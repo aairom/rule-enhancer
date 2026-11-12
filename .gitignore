@@ -1,0 +1,26 @@
+# --- managed by git-hygiene skill ---
+.env
+.env.*
+!.env.example
+_*/
+node_modules/
+.venv/
+__pycache__/
+.playwright-mcp/
+.run/
+*.onnx
+*.onnx.data
+*.so
+*.tgz
+*.tar.gz
+*.zip
+*.dylib
+input/*
+!input/.gitkeep
+output/*
+!output/.gitkeep
+AGENTS.md
+.bob/mcp.json
+
+# This repo ships the rules index; keep it despite the AGENTS.md policy above
+!.bob/rules/AGENTS.md

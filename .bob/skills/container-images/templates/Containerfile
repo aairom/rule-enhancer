@@ -1,0 +1,22 @@
+# syntax=docker/dockerfile:1
+# Template: multi-stage, minimal-size image. Valid as both Dockerfile and Containerfile
+# (no Docker-only instructions such as SHELL/HEALTHCHECK-with-format specifics).
+# Adapt the base image, build commands and entrypoint to the project.
+
+# ---- Build stage: compilers and build tools live only here ----
+FROM python:3.12-slim AS build
+WORKDIR /build
+COPY requirements.txt .
+RUN pip install --no-cache-dir --prefix=/install -r requirements.txt
+
+# ---- Runtime stage: only what is needed to run ----
+FROM python:3.12-slim
+ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1
+WORKDIR /app
+COPY --from=build /install /usr/local
+COPY . .
+# Run as non-root.
+RUN useradd --system --no-create-home app && chown -R app /app
+USER app
+EXPOSE 8501
+CMD ["python", "app.py"]
