@@ -29,7 +29,7 @@ bash scripts/ensure_gitignore.sh --check ../..  # audit only
 
 ## Policy enforced
 `.env`/`.env.*` (but not `.env.example`), `_*/` folders, `node_modules/`, `.venv/`, `__pycache__/`, `.playwright-mcp/`, `.run/` (runtime pid/log),
-`*.onnx *.onnx.data *.so *.tgz *.tar.gz *.zip *.dylib`, `input/*`, `output/*`, `AGENTS.md`, `.bob/mcp.json`.
+`*.onnx *.onnx.data *.so *.tgz *.tar.gz *.zip *.dylib`, `input/*`, `output/*`, `AGENTS.md`, `.bob/mcp.json`, `.bob/audit/` (approval audit log, contains command text).
 
 ## Notes
 - Always run before the first push; composes with `project-audit`.

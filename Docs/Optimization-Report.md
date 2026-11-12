@@ -8,7 +8,7 @@ Original rules are preserved unmodified in `output/<timestamp>/original-rules/` 
 | Rule files | 15 | 15 (same names, so existing references keep working) |
 | Words in always-loaded rules | 866 | 739 (-15%) |
 | Lines | 85 | 90 (+5: the rule-to-skill map table in `AGENTS.md`) |
-| Procedures that are executable and tested | 0 | 9 skills, 110 test assertions |
+| Procedures that are executable and tested | 0 | 9 skills, 122 test checks (incl. the 64-case approval-policy table) |
 
 Word count falls only modestly because every requirement was kept. The real gain is that multi-step procedures moved out of the always-loaded context into on-demand skills, and they are now verifiable.
 

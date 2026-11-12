@@ -34,6 +34,7 @@ ENTRIES=(
   "!output/.gitkeep"
   "AGENTS.md"
   ".bob/mcp.json"
+  ".bob/audit/"
 )
 
 MISSING=()

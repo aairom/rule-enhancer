@@ -20,7 +20,7 @@ echo "== git-hygiene"
 P="$(new)"; G="$SK/git-hygiene/scripts/ensure_gitignore.sh"
 assert_rc 1 "check fails without .gitignore" bash "$G" --check "$P"
 assert_rc 0 "creates .gitignore" bash "$G" "$P"
-for e in '^\.env$' '^_\*/$' '^node_modules/$' '^\.playwright-mcp/$' '^\*\.onnx$' '^AGENTS\.md$' '^\.bob/mcp\.json$' '^input/\*$' '^output/\*$' '^\*\.dylib$'; do
+for e in '^\.env$' '^_\*/$' '^node_modules/$' '^\.playwright-mcp/$' '^\*\.onnx$' '^AGENTS\.md$' '^\.bob/mcp\.json$' '^\.bob/audit/$' '^input/\*$' '^output/\*$' '^\*\.dylib$'; do
   assert_grep "entry $e" "$e" "$P/.gitignore"
 done
 assert_file "input/.gitkeep" "$P/input/.gitkeep"
@@ -168,6 +168,27 @@ chmod +x "$P/scripts/stop.sh"; echo 'notes' > "$P/NOTES.md"
 assert_rc 1 "detects stray document" bash "$A" "$P"
 rm "$P/NOTES.md"; echo 'password = "supersecret99"' > "$P/app.py"  # nosecret (test fixture)
 assert_rc 1 "detects secret" bash "$A" "$P"
+
+echo "== approval hooks"
+if command -v node >/dev/null; then
+  assert_rc 0 "approval-policy decision table" node "$ROOT/tests/policy.test.mjs"
+  P="$(new)"; AH="$ROOT/.bob/hooks/audit-resolved.mjs"
+  EV="{\"session_id\":\"s1\",\"cwd\":\"$P\",\"hook_event_name\":\"PermissionResolved\",\"tool_name\":\"execute_command\",\"decision\":\"approved\",\"tool_input\":{\"command\":\"ls\"}}"
+  echo "$EV" | node "$AH"; [ $? -eq 0 ] && ok "audit hook exits 0" || bad "audit hook exits 0"
+  assert_file "audit log written" "$P/.bob/audit/approvals.jsonl"
+  assert_grep "audit line has decision" '"decision":"approved"' "$P/.bob/audit/approvals.jsonl"
+  echo "$EV" | node "$AH"
+  [ "$(wc -l < "$P/.bob/audit/approvals.jsonl" | tr -d ' ')" = "2" ] && ok "audit log appends" || bad "audit log appends"
+  echo 'not json' | node "$AH"; [ $? -eq 0 ] && ok "audit hook fails open on bad input" || bad "audit hook fails open"
+  echo "${EV//PermissionResolved/PreToolUse}" | node "$AH"
+  [ "$(wc -l < "$P/.bob/audit/approvals.jsonl" | tr -d ' ')" = "2" ] && ok "audit ignores other events" || bad "audit ignores other events"
+  echo 'not json' | node "$ROOT/.bob/hooks/approval-policy.mjs" > "$WORK/out"; [ $? -eq 0 ] && [ ! -s "$WORK/out" ] && ok "policy defers on bad input" || bad "policy defers on bad input"
+  node -e 'JSON.parse(require("fs").readFileSync(process.argv[1]))' "$ROOT/.bob/settings.json" && ok "settings.json is valid JSON" || bad "settings.json is valid JSON"
+  assert_grep "settings wires approval-policy" 'approval-policy\.mjs' "$ROOT/.bob/settings.json"
+  assert_grep "settings wires audit-resolved" 'audit-resolved\.mjs' "$ROOT/.bob/settings.json"
+else
+  echo "  skip node not installed"
+fi
 
 echo "== platform scripts"
 assert_rc 0 "validate_skills on real skills" bash "$ROOT/scripts/validate_skills.sh" "$SK"

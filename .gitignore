@@ -24,3 +24,4 @@ AGENTS.md
 
 # This repo ships the rules index; keep it despite the AGENTS.md policy above
 !.bob/rules/AGENTS.md
+.bob/audit/

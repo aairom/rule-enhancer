@@ -1,0 +1,19 @@
+{
+  "hooks": {
+    "PermissionRequest": [
+      {
+        "matcher": "^execute_command$",
+        "hooks": [
+          { "type": "command", "command": "node .bob/hooks/approval-policy.mjs", "timeout": 10 }
+        ]
+      }
+    ],
+    "PermissionResolved": [
+      {
+        "hooks": [
+          { "type": "command", "command": "node .bob/hooks/audit-resolved.mjs", "timeout": 10 }
+        ]
+      }
+    ]
+  }
+}
